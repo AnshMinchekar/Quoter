@@ -19,6 +19,8 @@ body { background: var(--surface); }
 textarea { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
 /* hide the scrollbar unless needed */
+/* Smooth font + scrollbar */
+textarea { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 textarea { scrollbar-width: thin; }
 textarea::-webkit-scrollbar { width: 8px; }
 textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 8px; }

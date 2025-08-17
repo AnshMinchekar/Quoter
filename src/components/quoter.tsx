@@ -67,7 +67,7 @@ export default function Quoter() {
     const svg = buildSVG({
       w, h, bg, fg, radius, padding,
       fontCss, fontSize, lineHeight, align,
-      text: snapshot || "Let it flow...",
+      text: snapshot || "start typing…",
     });
     if (format === "svg") exportSVG(svg, `quoter_${w}x${h}.svg`);
     else await exportPNG(svg, w, h, `quoter_${w}x${h}.png`, pngScale);
@@ -83,7 +83,7 @@ export default function Quoter() {
           spellCheck={false}
           autoCorrect="off"
           autoCapitalize="off"
-          placeholder="Let it flow..."
+          placeholder="start typing…"
           className={[
             "w-full max-w-5xl h-[66vh] md:h-[72vh]",
             "bg-transparent outline-none border-0 resize-none",
@@ -94,7 +94,7 @@ export default function Quoter() {
           style={{
             fontFamily: fontCss,
             padding: `${padding}px 0`,
-            textAlign: align,
+            textAlign: align as any,
             color: fg,
           }}
         />
@@ -217,7 +217,7 @@ export default function Quoter() {
                       wordBreak: "break-word",
                     }}
                   >
-                    {snapshot || "Let it flow…"}
+                    {snapshot || "start typing…"}
                   </div>
                 </div>
 
