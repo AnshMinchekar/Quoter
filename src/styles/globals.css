@@ -1,26 +1,41 @@
+/* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --surface: #f8fafc;
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #__next {
+  height: 100%;
+  overflow-x: hidden;  /* ⬅️ prevents the bottom white scrollbar */
 }
 
-html, body, #__next { height: 100%; }
-body { background: var(--surface); }
+body { background: transparent; }
 
-/* contenteditable placeholder */
-[contenteditable][data-placeholder]:empty:before {
-    content: attr(data-placeholder);
-    color: rgba(199, 210, 254, 0.35);
-  }
-  
-  /* smoother text look */
-textarea { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+/* hide scrollbars where we don't want them */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* hide the scrollbar unless needed */
-/* Smooth font + scrollbar */
-textarea { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-textarea { scrollbar-width: thin; }
-textarea::-webkit-scrollbar { width: 8px; }
-textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 8px; }
+/* textarea polish */
+textarea {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  outline: none;
+  border: 0;
+}
+textarea::placeholder {
+  color: var(--placeholder-color, #888);
+  opacity: .55;
+}
+
+/* subtle fade mask helper (used by font carousel) */
+.mask-fade-x {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+/* Hide Next.js devtools button in dev (optional) */
+button[aria-label="Open Next.js devtools"],
+button[aria-label="Open devtools"],
+[data-nextjs-devtools],
+.nextjs-devtools { display: none !important; }
