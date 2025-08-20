@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Quoter is a minimalist typography playground for exploring how type transforms words.
+
+It presents quotes in a fullscreen, distraction‑free layout where text is the primary design element: oversized lettering on a black canvas with soft pastel accents. Interactive tools — a font scroll bar to cycle typefaces, a size button to adjust scale, and a color picker to change tone — let you experiment with styles, sizes, and palettes while keeping the interface clean, modern, and immersive.
 
 ## Getting Started
 
@@ -16,9 +18,9 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `src/quoter.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to load a curated set of typefaces.
 
 ## Learn More
 

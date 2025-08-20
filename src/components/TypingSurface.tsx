@@ -1,7 +1,8 @@
 import { RefObject, useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 
 type Props = {
-  textareaRef: RefObject<HTMLTextAreaElement>;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
   placeholder?: string;
   color: string;
   fontCss: string;
@@ -28,10 +29,11 @@ export default function TypingSurface({
   const localRef = useRef<HTMLTextAreaElement | null>(null);
   const ref = (node: HTMLTextAreaElement) => {
     localRef.current = node;
-    if (textareaRef) (textareaRef as any).current = node;
+    if (textareaRef?.current !== undefined) {
+      (textareaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = node;
+    }
   };
 
-  // Resize the textarea to fit content (no inner scrollbar)
   const autoresize = () => {
     const el = localRef.current;
     if (!el) return;
@@ -40,10 +42,9 @@ export default function TypingSurface({
   };
 
   useEffect(() => {
-    autoresize(); // on mount
+    autoresize();
   }, []);
 
-  // Recompute height when typography or padding changes
   useEffect(() => {
     autoresize();
   }, [fontSize, lineHeight, paddingX, paddingY, align]);
@@ -63,11 +64,10 @@ export default function TypingSurface({
         fontSize,
         lineHeight,
         padding: `${paddingY}px ${paddingX}px`,
-        textAlign: align as any,
-        minHeight: "42vh", // feels substantial when empty, then grows
-        // pass placeholder color down
-        ["--placeholder-color" as any]: color,
-      }}
+        textAlign: align as CSSProperties["textAlign"],
+        minHeight: "42vh",
+        "--placeholder-color": color,
+      } as CSSProperties}
       onKeyDown={(e) => {
         if (e.key === "Tab") {
           e.preventDefault();

@@ -1,62 +1,81 @@
-import { useRef, useState } from "react";
+// src/quoter.tsx
+import { useEffect, useRef, useState } from "react";
 import TopBar from "@/components/TopBar";
 import BottomBar from "@/components/BottomBar";
 import TypingSurface from "@/components/TypingSurface";
 import ExportModal from "@/components/ExportModal";
+
 import { FONT_ITEMS } from "@/config/fonts";
 import { FONT_SIZE_STEPS } from "@/config/presets";
 import { DEFAULTS } from "@/config/theme";
+
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import useLocalSettings from "@/hooks/useLocalSettings";
 import type { Align } from "@/utils/svg";
 
 export default function Quoter() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // persistent UI settings
+  // persisted UI settings
   const [settings, setSettings] = useLocalSettings("quoter:v1", {
     bg: DEFAULTS.bg,
     fg: DEFAULTS.fg,
-    fontIndex: 2,  // Open Sans
-    sizeIndex: 1,  // 32
+    fontIndex: 1, // Times New Roman by default
+    sizeIndex: 0, // 24
     align: "left" as Align,
   });
 
   const fontSize = FONT_SIZE_STEPS[settings.sizeIndex];
 
-  // export modal state
+  // export dialog state
   const [exportOpen, setExportOpen] = useState(false);
   const [expW, setExpW] = useState(DEFAULTS.exportW);
   const [expH, setExpH] = useState(DEFAULTS.exportH);
 
+  // setters
   const setBg = (bg: string) => setSettings({ ...settings, bg });
   const setFg = (fg: string) => setSettings({ ...settings, fg });
   const setFontIndex = (i: number) => setSettings({ ...settings, fontIndex: i });
   const cycleFontSize = () =>
-    setSettings({ ...settings, sizeIndex: (settings.sizeIndex + 1) % FONT_SIZE_STEPS.length });
+    setSettings({
+      ...settings,
+      sizeIndex: (settings.sizeIndex + 1) % FONT_SIZE_STEPS.length,
+    });
   const cycleAlign = () =>
     setSettings({
       ...settings,
       align:
-        settings.align === "left" ? "center" :
-        settings.align === "center" ? "right" : "left",
+        settings.align === "left"
+          ? ("center" as Align)
+          : settings.align === "center"
+          ? ("right" as Align)
+          : ("left" as Align),
     });
 
+  // shortcuts: Ctrl/Cmd+E open export, Tab cycles align, Esc closes modal
   useKeyboardShortcuts({
     onExport: () => setExportOpen(true),
     onCycleAlign: cycleAlign,
     onEscape: () => setExportOpen(false),
   });
 
+  // Keep page background in sync to avoid bottom-edge white gaps on long content
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.style.backgroundColor = settings.bg;
+      document.documentElement.style.backgroundColor = settings.bg;
+    }
+  }, [settings.bg]);
+
   return (
     <div
-      className="min-h-screen grid grid-rows-[auto,auto,auto,auto]"
+      className="min-h-screen grid grid-rows-[auto,auto,auto,auto] overflow-x-hidden"
       style={{ backgroundColor: settings.bg, color: settings.fg }}
     >
-      {/* Top bar */}
+      {/* Top bar (bg color + export) */}
       <TopBar bg={settings.bg} setBg={setBg} onExport={() => setExportOpen(true)} />
 
-      {/* Content (auto-grows; page scrolls) */}
+      {/* Content area (auto-grows; page scrolls, no inner scrollbar) */}
       <div className="w-full flex justify-center px-6 py-16">
         <TypingSurface
           textareaRef={textareaRef}
@@ -71,7 +90,7 @@ export default function Quoter() {
         />
       </div>
 
-      {/* Bottom bar */}
+      {/* Bottom bar (size chip • 3-slot font carousel • text color) */}
       <BottomBar
         fontSize={fontSize}
         onNextFontSize={cycleFontSize}
@@ -81,15 +100,15 @@ export default function Quoter() {
         setFg={setFg}
       />
 
-      {/* Footer line + note */}
+      {/* Footer: thin line + center label */}
       <div className="relative">
         <div className="border-t border-white/15" />
         <div className="absolute inset-0 -translate-y-1 flex items-center justify-center pointer-events-none">
-          <span className="px-3 text-xs text-white/60">Made with boredom 💙</span>
+          <span className="px-3 text-xs text-white/60">Made with Boredom 💙</span>
         </div>
       </div>
 
-      {/* Export modal (no preview) */}
+      {/* Export (no preview) */}
       <ExportModal
         open={exportOpen}
         onClose={() => setExportOpen(false)}

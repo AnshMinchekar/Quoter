@@ -1,4 +1,3 @@
-/* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,11 +6,13 @@
 
 html, body, #__next {
   height: 100%;
-  overflow-x: hidden;  /* ⬅️ prevents the bottom white scrollbar */
+  overflow-x: hidden; /* kill bottom white scrollbar */
+  background: #000; /* ensure no white bleed at page edges */
 }
 
-body { background: transparent; }
+body { background: #000; }
 
+/* keep your other rules (placeholder color, devtools hide, etc.) */
 /* hide scrollbars where we don't want them */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
