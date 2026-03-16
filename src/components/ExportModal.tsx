@@ -10,7 +10,10 @@ type Props = {
   text: string;
   bg: string;
   fg: string;
+  /** CSS font-family with CSS vars — used for the SVG export */
   fontCss: string;
+  /** CSS font-family without CSS vars — used for the canvas PNG export */
+  fontFamily: string;
 
   w: number;
   h: number;
@@ -26,7 +29,7 @@ type Props = {
 
 export default function ExportModal(props: Props) {
   const {
-    open, onClose, text, bg, fg, fontCss,
+    open, onClose, text, bg, fg, fontCss, fontFamily,
     w, h, setW, setH,
     align, fontSize, lineHeight, padding, radius,
   } = props;
@@ -35,12 +38,19 @@ export default function ExportModal(props: Props) {
   if (!open) return null;
 
   async function doExport(kind: "png" | "svg") {
-    const svg = buildSVG({
-      w, h, bg, fg, radius, padding,
-      align, fontCss, fontSize, lineHeight, text: text || "Let it flow…",
-    });
-    if (kind === "svg") exportSVG(svg, `quoter_${w}x${h}.svg`);
-    else await exportPNG(svg, w, h, `quoter_${w}x${h}.png`, pngScale);
+    if (kind === "svg") {
+      const svg = buildSVG({
+        w, h, bg, fg, radius, padding,
+        align, fontCss, fontSize, lineHeight, text: text || "Let it flow…",
+      });
+      exportSVG(svg, `quoter_${w}x${h}.svg`);
+    } else {
+      await exportPNG(
+        { w, h, bg, fg, radius, padding, align, fontFamily, fontSize, lineHeight, text: text || "Let it flow…" },
+        `quoter_${w}x${h}.png`,
+        pngScale,
+      );
+    }
     onClose();
   }
 
