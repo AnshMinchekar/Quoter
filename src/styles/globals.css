@@ -23,10 +23,21 @@ textarea {
   text-rendering: optimizeLegibility;
   outline: none;
   border: 0;
+  /* Ensure the caret blinks even when the textarea is the only interactive focus */
+  caret-shape: bar;
 }
 textarea::placeholder {
   color: var(--placeholder-color, #888);
   opacity: .55;
+}
+
+/* Keep caret visible at all times via a CSS-driven blink animation */
+@keyframes caret-blink {
+  0%, 100% { caret-color: var(--caret-color, currentColor); }
+  50%       { caret-color: transparent; }
+}
+textarea:focus {
+  animation: caret-blink 1s step-start infinite;
 }
 
 /* subtle fade mask helper (used by font carousel) */

@@ -76,7 +76,8 @@ export default function Quoter() {
       <TopBar bg={settings.bg} setBg={setBg} onExport={() => setExportOpen(true)} />
 
       {/* Content area (auto-grows; page scrolls, no inner scrollbar) */}
-      <div className="w-full flex justify-center px-6 py-16">
+      {/* Clicking the empty background re-focuses the textarea so the cursor keeps blinking */}
+      <div className="w-full flex justify-center px-6 py-16" onClick={() => textareaRef.current?.focus()}>
         <TypingSurface
           textareaRef={textareaRef}
           color={settings.fg}
@@ -108,7 +109,7 @@ export default function Quoter() {
         </div>
       </div>
 
-      {/* Export (no preview) */}
+      {/* Export */}
       <ExportModal
         open={exportOpen}
         onClose={() => setExportOpen(false)}
@@ -116,6 +117,7 @@ export default function Quoter() {
         bg={settings.bg}
         fg={settings.fg}
         fontCss={FONT_ITEMS[settings.fontIndex].css}
+        fontFamily={FONT_ITEMS[settings.fontIndex].exportFamily}
         w={expW}
         h={expH}
         setW={setExpW}

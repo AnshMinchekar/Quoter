@@ -34,23 +34,90 @@ export function exportSVG(svgString: string, filename = "quoter.svg") {
   downloadBlob(new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }), filename);
 }
 
-export async function exportPNG(svgString: string, w: number, h: number, filename = "quoter.png", scale = 1) {
-  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
+/** Word-wrap a single paragraph into lines that fit within maxWidth. */
+function wrapParagraph(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  if (!text) return [""];
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (ctx.measureText(candidate).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+/**
+ * Export PNG using the Canvas API.
+ * Uses already-loaded browser fonts so the rendered text exactly matches
+ * what the user sees in the editor (no SVG-foreignObject / CSS-variable issues).
+ */
+export async function exportPNG(opts: {
+  w: number; h: number; bg: string; fg: string;
+  radius: number; padding: number; align: Align;
+  /** Actual CSS font-family, no CSS variables — e.g. "'Bebas Neue', Impact, sans-serif" */
+  fontFamily: string;
+  fontSize: number; lineHeight: number; text: string;
+}, filename: string, scale = 2) {
+  // Wait for all web fonts (loaded via next/font) to be painted-ready
+  await document.fonts.ready;
+
+  const { w, h, bg, fg, radius, padding, align, fontFamily, fontSize, lineHeight, text } = opts;
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = Math.max(1, Math.floor(w * scale));
+  canvas.height = Math.max(1, Math.floor(h * scale));
+  const ctx = canvas.getContext("2d")!;
+
+  ctx.scale(scale, scale);
+
+  // ── Background ──────────────────────────────────────────────────────────────
+  ctx.fillStyle = bg;
+  if (radius > 0 && typeof ctx.roundRect === "function") {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, w, h, radius);
+    ctx.fill();
+  } else {
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  // ── Text setup ──────────────────────────────────────────────────────────────
+  const body = (text || "Let it flow…").trimEnd();
+  const lh   = fontSize * lineHeight;
+  const maxW  = w - padding * 2;
+
+  ctx.font         = `${fontSize}px ${fontFamily}`;
+  ctx.fillStyle    = fg;
+  ctx.textAlign    = align;
+  ctx.textBaseline = "top";
+
+  // Wrap each hard line individually
+  const allLines: string[] = [];
+  for (const para of body.split("\n")) {
+    const wrapped = wrapParagraph(ctx, para, maxW);
+    allLines.push(...wrapped);
+  }
+
+  // Vertically center the text block, clamped to padding
+  const blockH  = allLines.length * lh;
+  const startY  = Math.max(padding, (h - blockH) / 2);
+  const startX  = align === "center" ? w / 2 : align === "right" ? w - padding : padding;
+
+  allLines.forEach((line, i) => {
+    ctx.fillText(line, startX, startY + i * lh, maxW);
+  });
+
+  // ── Download ─────────────────────────────────────────────────────────────────
   await new Promise<void>((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.floor(w * scale));
-      canvas.height = Math.max(1, Math.floor(h * scale));
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob((blob) => { if (blob) downloadBlob(blob, filename); URL.revokeObjectURL(url); resolve(); }, "image/png");
-      } else { URL.revokeObjectURL(url); resolve(); }
-    };
-    img.onerror = () => resolve();
-    img.src = url;
+    canvas.toBlob((blob) => {
+      if (blob) downloadBlob(blob, filename);
+      resolve();
+    }, "image/png");
   });
 }
